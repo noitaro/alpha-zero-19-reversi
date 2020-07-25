@@ -19,5 +19,5 @@ for i in range(10):
     # パラメータ更新部
     train_network()
 
-    # 新ハ゜ラメータ評価部
+    # 新パラメータ評価部
     evaluate_network()
