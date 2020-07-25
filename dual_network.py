@@ -12,8 +12,8 @@ import os
 # パラメータの準備
 DN_FILTERS  = 128 # 畳み込み層のカーネル数（本家は256）
 DN_RESIDUAL_NUM =  16 # 残差ブロックの数（本家は19）
-DN_INPUT_SHAPE = (6, 6, 2) # 入力シェイプ
-DN_OUTPUT_SIZE = 37 # 行動数(配置先(6*6)+パス(1))
+DN_INPUT_SHAPE = (8, 8, 2) # 入力シェイプ
+DN_OUTPUT_SIZE = 65 # 行動数(配置先(8*8)+パス(1))
 
 # 畳み込み層の作成
 def conv(filters):

@@ -6,6 +6,10 @@
 import random
 import math
 
+# パラメータの準備
+G_MASU_NUM = 64 # マス数
+G_ROW_COL_NUM = 8 # 行列数
+
 # ゲーム状態
 class State:
 
@@ -24,10 +28,10 @@ class State:
 
         # 石の初期配置
         if pieces == None or enemy_pieces == None:
-            self.pieces = [0] * 36
-            self.pieces[14] = self.pieces[21] = 1
-            self.enemy_pieces = [0] * 36
-            self.enemy_pieces[15] = self.enemy_pieces[20] = 1
+            self.pieces = [0] * G_MASU_NUM
+            self.pieces[27] = self.pieces[36] = 1
+            self.enemy_pieces = [0] * G_MASU_NUM
+            self.enemy_pieces[28] = self.enemy_pieces[35] = 1
 
     # 石の数の取得
     def piece_count(self, pieces):
@@ -47,31 +51,31 @@ class State:
 
     # ゲーム終了かどうか
     def is_done(self):
-        return self.piece_count(self.pieces) + self.piece_count(self.enemy_pieces) == 36 or self.pass_end
+        return self.piece_count(self.pieces) + self.piece_count(self.enemy_pieces) == G_MASU_NUM or self.pass_end
 
     # 次の状態の取得
     def next(self, action):
         state = State(self.pieces.copy(), self.enemy_pieces.copy(), self.depth+1)
-        if action != 36:
-            state.is_legal_action_xy(action%6, int(action/6), True)
+        if action != G_MASU_NUM:
+            state.is_legal_action_xy(action % G_ROW_COL_NUM, int(action / G_ROW_COL_NUM), True)
         w = state.pieces
         state.pieces = state.enemy_pieces
         state.enemy_pieces = w
 
         # 2回連続パス判定
-        if action == 36 and state.legal_actions() == [36]:
+        if action == G_MASU_NUM and state.legal_actions() == [G_MASU_NUM]:
             state.pass_end = True
         return state
 
     # 合法手のリストの取得
     def legal_actions(self):
         actions = []
-        for j in range(0,6):
-            for i in range(0,6):
+        for j in range(0, G_ROW_COL_NUM):
+            for i in range(0, G_ROW_COL_NUM):
                 if self.is_legal_action_xy(i, j):
-                    actions.append(i+j*6)
+                    actions.append(i + j * G_ROW_COL_NUM)
         if len(actions) == 0:
-            actions.append(36) # パス
+            actions.append(G_MASU_NUM) # パス
         return actions
 
     # 任意のマスが合法手かどうか
@@ -80,39 +84,39 @@ class State:
         def is_legal_action_xy_dxy(x, y, dx, dy):
             # １つ目 相手の石
             x, y = x+dx, y+dy
-            if y < 0 or 5 < y or x < 0 or 5 < x or \
-                self.enemy_pieces[x+y*6] != 1:
+            if y < 0 or (G_ROW_COL_NUM - 1) < y or x < 0 or (G_ROW_COL_NUM - 1) < x or \
+                self.enemy_pieces[x + (y * G_ROW_COL_NUM)] != 1:
                 return False
 
             # 2つ目以降
-            for j in range(6):
+            for j in range(G_ROW_COL_NUM):
                 # 空
-                if y < 0 or 5 < y or x < 0 or 5 < x or \
-                    (self.enemy_pieces[x+y*6] == 0 and self.pieces[x+y*6] == 0):
+                if y < 0 or (G_ROW_COL_NUM - 1) < y or x < 0 or (G_ROW_COL_NUM - 1) < x or \
+                    (self.enemy_pieces[x + (y * G_ROW_COL_NUM)] == 0 and self.pieces[x + (y * G_ROW_COL_NUM)] == 0):
                     return False
 
                 # 自分の石
-                if self.pieces[x+y*6] == 1:
+                if self.pieces[x + (y * G_ROW_COL_NUM)] == 1:
                     # 反転
                     if flip:
-                        for i in range(6):
+                        for i in range(G_ROW_COL_NUM):
                             x, y = x-dx, y-dy
-                            if self.pieces[x+y*6] == 1:
+                            if self.pieces[x + (y * G_ROW_COL_NUM)] == 1:
                                 return True
-                            self.pieces[x+y*6] = 1
-                            self.enemy_pieces[x+y*6] = 0
+                            self.pieces[x + (y * G_ROW_COL_NUM)] = 1
+                            self.enemy_pieces[x + (y * G_ROW_COL_NUM)] = 0
                     return True
                 # 相手の石
-                x, y = x+dx, y+dy
+                x, y = x + dx, y + dy
             return False
 
         # 空きなし
-        if self.enemy_pieces[x+y*6] == 1 or self.pieces[x+y*6] == 1:
+        if self.enemy_pieces[x + (y * G_ROW_COL_NUM)] == 1 or self.pieces[x + (y * G_ROW_COL_NUM)] == 1:
             return False
 
         # 石を置く
         if flip:
-            self.pieces[x+y*6] = 1
+            self.pieces[x + (y * G_ROW_COL_NUM)] = 1
 
         # 任意の位置が合法手かどうか
         flag = False
@@ -123,27 +127,27 @@ class State:
 
     # 先手かどうか
     def is_first_player(self):
-        return self.depth%2 == 0
+        return self.depth % 2 == 0
 
     # 文字列表示
     def __str__(self):
         ox = ('o', 'x') if self.is_first_player() else ('x', 'o')
         str = ''
-        for i in range(36):
+        for i in range(G_MASU_NUM):
             if self.pieces[i] == 1:
                 str += ox[0]
             elif self.enemy_pieces[i] == 1:
                 str += ox[1]
             else:
                 str += '-'
-            if i % 6 == 5:
+            if i % G_ROW_COL_NUM == (G_ROW_COL_NUM - 1):
                 str += '\n'
         return str
 
 # ランダムで行動選択
 def random_action(state):
     legal_actions = state.legal_actions()
-    return legal_actions[random.randint(0, len(legal_actions)-1)]
+    return legal_actions[random.randint(0, len(legal_actions) - 1)]
 
 # 動作確認
 if __name__ == '__main__':

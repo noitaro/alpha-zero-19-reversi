@@ -10,6 +10,10 @@ from pathlib import Path
 from threading import Thread
 import tkinter as tk
 
+# パラメータの準備
+G_MASU_NUM = 64 # マス数
+G_ROW_COL_NUM = 8 # 行列数
+
 # ベストプレイヤーのモデルの読み込み
 model = load_model('./model/best.h5')
 
@@ -28,7 +32,7 @@ class GameUI(tk.Frame):
         self.next_action = pv_mcts_action(model, 0.0)
 
         # キャンバスの生成
-        self.c = tk.Canvas(self, width = 240, height = 240, highlightthickness = 0)
+        self.c = tk.Canvas(self, width = (40 * G_ROW_COL_NUM), height = (40 * G_ROW_COL_NUM), highlightthickness = 0)
         self.c.bind('<Button-1>', self.turn_of_human)
         self.c.pack()
 
@@ -48,17 +52,17 @@ class GameUI(tk.Frame):
             return
 
         # クリック位置を行動に変換
-        x = int(event.x/40)
-        y = int(event.y/40)
-        if x < 0 or 5 < x or y < 0 or 5 < y: # 範囲外
+        x = int(event.x / 40)
+        y = int(event.y / 40)
+        if x < 0 or (G_ROW_COL_NUM - 1) < x or y < 0 or (G_ROW_COL_NUM - 1) < y: # 範囲外
             return
-        action = x + y * 6
+        action = x + y * G_ROW_COL_NUM
 
         # 合法手でない時
         legal_actions = self.state.legal_actions()
-        if legal_actions == [36]:
-            action = 36 # パス
-        if action != 36 and not (action in legal_actions):
+        if legal_actions == [G_MASU_NUM]:
+            action = G_MASU_NUM # パス
+        if action != G_MASU_NUM and not (action in legal_actions):
             return
 
         # 次の状態の取得
@@ -83,21 +87,21 @@ class GameUI(tk.Frame):
 
     # 石の描画
     def draw_piece(self, index, first_player):
-        x = (index%6)*40+5
-        y = int(index/6)*40+5
+        x = (index % G_ROW_COL_NUM) * 40 + (G_ROW_COL_NUM - 1)
+        y = int(index / G_ROW_COL_NUM) * 40 + (G_ROW_COL_NUM - 1)
         if first_player:
-            self.c.create_oval(x, y, x+30, y+30, width = 1.0, outline = '#000000', fill = '#C2272D')
+            self.c.create_oval(x, y, x + 30, y + 30, width = 1.0, outline = '#000000', fill = '#C2272D')
         else:
-            self.c.create_oval(x, y, x+30, y+30, width = 1.0, outline = '#000000', fill = '#FFFFFF')
+            self.c.create_oval(x, y, x + 30, y + 30, width = 1.0, outline = '#000000', fill = '#FFFFFF')
 
     # 描画の更新
     def on_draw(self):
         self.c.delete('all')
-        self.c.create_rectangle(0, 0, 240, 240, width = 0.0, fill = '#C69C6C')
+        self.c.create_rectangle(0, 0, (40 * G_ROW_COL_NUM), (40 * G_ROW_COL_NUM), width = 0.0, fill = '#C69C6C')
         for i in range(1, 8):
-            self.c.create_line(0, i*40, 240, i*40, width = 1.0, fill = '#000000')
-            self.c.create_line(i*40, 0, i*40, 240, width = 1.0, fill = '#000000')
-        for i in range(36):
+            self.c.create_line(0, i * 40, (40 * G_ROW_COL_NUM), i * 40, width = 1.0, fill = '#000000')
+            self.c.create_line(i * 40, 0, i * 40, (40 * G_ROW_COL_NUM), width = 1.0, fill = '#000000')
+        for i in range(G_MASU_NUM):
             if self.state.pieces[i] == 1:
                 self.draw_piece(i, self.state.is_first_player())
             if self.state.enemy_pieces[i] == 1:
