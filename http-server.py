@@ -65,7 +65,7 @@ class MyHandler(BaseHTTPRequestHandler):
         
 if __name__ == '__main__':
     
-    server_address = ('localhost', 8080)
+    server_address = ('0.0.0.0', 8080)
     httpd = HTTPServer(server_address, MyHandler)
     print('Serving HTTP on localhost port %d ...' % server_address[1])
     print('use <Ctrl-(C or break)> to stop')
