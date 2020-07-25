@@ -7,7 +7,7 @@ from urllib.parse import parse_qs
 from pv_mcts import pv_mcts_action
 from tensorflow.keras.models import load_model
 
-# http://localhost:8000/
+# http://localhost:8080/
 class MyHandler(BaseHTTPRequestHandler):
     
     def do_GET(self):
@@ -65,7 +65,7 @@ class MyHandler(BaseHTTPRequestHandler):
         
 if __name__ == '__main__':
     
-    server_address = ('localhost', 80)
+    server_address = ('localhost', 8080)
     httpd = HTTPServer(server_address, MyHandler)
     print('Serving HTTP on localhost port %d ...' % server_address[1])
     print('use <Ctrl-(C or break)> to stop')
